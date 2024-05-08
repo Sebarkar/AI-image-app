@@ -1,0 +1,30 @@
+$new-typography: (
+        'h4': (
+                'size': 1rem,
+                'line-height': 1.5rem,
+                'letter-spacing': .0073529412em,
+        ),
+        'h1': (
+                'size': 2.125rem,
+                'line-height': 3.5rem,
+                'letter-spacing': -.015625em,
+        ),
+        'h3': (
+                'size': 1.25rem,
+                'line-height': 2rem,
+        ),
+        'subtitle-2': (
+                'size': .75rem,
+                'line-height': 1rem,
+                'letter-spacing': .0071428571em,
+        ),
+        'subtitle-1': (
+                'size': .875rem,
+                'line-height': 1rem,
+                'letter-spacing': .009375em,
+        ),
+);
+
+@use 'vuetify' with (
+  $typography: $new-typography,
+);
