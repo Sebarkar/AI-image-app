@@ -24,12 +24,6 @@ return new class extends Migration
                 ->virtualAs('max_connections - connections');
             $table->boolean('status')->default(true);
         });
-
-        \App\Models\Bots\Bot::create([
-            'key' => 'MTA3NzI3NzY3MTM5MTc3NjgwOA.GLGbI7.BV4JiG6NiHuBFmQQ89237ZUvp5i8YIoQU3GdJs',
-            'target' => '1234932572480602186',
-            'provider' => 'midjourney',
-        ]);
     }
 
     /**
