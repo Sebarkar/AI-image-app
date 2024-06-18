@@ -5,7 +5,7 @@
 - Create .env
 - Install global http://ngrok.com for handle webhook to local server
 - Change `WEBHOOK_URL`
-- Change window hosts file app API url image.test to server
+- Change window hosts file should contain `image.test`
 - Change location to /front
 - Run `run npm install`
 - Create .env in /front
