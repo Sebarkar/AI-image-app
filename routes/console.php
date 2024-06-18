@@ -9,3 +9,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote')->hourly();
 
 Schedule::command('model:prune', ['--model' => [\App\Models\OneTimePassword::class],])->everyMinute();
+Schedule::call(function () {
+    \App\Services\AIs\AIClient::provider('replicate')->saveAvailableModels();
+})->daily()->at('00:00');

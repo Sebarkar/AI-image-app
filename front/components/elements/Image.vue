@@ -9,10 +9,19 @@ const props = defineProps({
         default: 'image',
     },
 })
+
+const imageLoaded = ref(false)
+
+const handleImageLoaded = () => {
+    imageLoaded.value = true
+}
 </script>
 
 <template>
-    <NuxtImg :src="src" :alt="alt" loading="lazy" placeholder/>
+    <div class=" w-full h-full">
+        <USkeleton class="h-full w-full absolute left-0 top-0 z-10" v-if="!imageLoaded"/>
+        <NuxtImg @load="handleImageLoaded" :src="src" :alt="alt" loading="lazy" class="object-cover w-full h-full" />
+    </div>
 </template>
 
 <style scoped>

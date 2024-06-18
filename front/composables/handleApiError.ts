@@ -15,6 +15,9 @@ export function handleApiError(response: { status: number; headers: { get: Funct
     if (response.status == 500) {
         toast.add({color: 'red', title: $i18n.t('errors.server error'), description: response._data.message, icon: 'error'})
     }
+    if (response.status == 422) {
+        toast.add({color: 'red', title: $i18n.t('errors.validation error'), description: response._data.message, icon: 'error'})
+    }
     if (response.status == 301) {
         router.replace('/')
 

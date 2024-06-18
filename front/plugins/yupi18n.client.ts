@@ -15,8 +15,8 @@ export default defineNuxtPlugin((nuxtApp) => {
             email: $i18n.t('errors.invalid email'),
         },
         number: {
-            min: ({ min }) => {console.log(({ key: 'errors.field_too_short', values: { min } }))},
-            max: ({ max }) => ({ key: 'errors.field_too_big', values: { max } }),
+            min: ({ min }) => $i18n.t('errors.number.less_than_min', { number: min }),
+            max: ({ max }) => $i18n.t('errors.number.more_than_max', { number: max }),
             lessThan: ({ less }) => ({ key: 'errors.field_too_big', values: { less } }),
             moreThan: ({ more }) => ({ key: 'errors.field_too_big', values: { more } }),
         },

@@ -20,11 +20,11 @@ export function useApiFetch<T>(path: string, options: UseFetchOptions<T> = {}) {
         options.method = 'POST'
     }
 
-    if (options.method !== 'GET') {
-        options.body = Object.assign({}, options.body, {
-
-        })
-    }
+    // if (options.method === 'GET') {
+    //     options.body = Object.assign({}, options.body, {
+    //
+    //     })
+    // }
 
     const authToken = useCookie('access_token');
 

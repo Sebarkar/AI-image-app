@@ -59,4 +59,9 @@
     .flex-center {
         @apply flex justify-center items-center;
     }
+
+    .bg-stripes {
+        background-image: linear-gradient(135deg, rgb(var(--color-gray-200)) 10%, #0000 0, #0000 50%, rgb(var(--color-gray-200)) 0, rgb(var(--color-gray-200)) 60%, #0000 0, #0000);
+        background-size: 10px 10px;
+    }
 }

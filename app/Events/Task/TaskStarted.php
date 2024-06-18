@@ -2,6 +2,7 @@
 
 namespace App\Events\Task;
 
+use App\Http\Resources\TaskResource;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -31,7 +32,7 @@ class TaskStarted implements ShouldBroadcastNow
     public function broadcastOn()
     {
         return [
-            new PrivateChannel('task.' . $this->task->owner_id),
+            new PrivateChannel('task.' . $this->task->user_id),
         ];
     }
 
@@ -53,7 +54,7 @@ class TaskStarted implements ShouldBroadcastNow
     public function broadcastWith()
     {
         return [
-            'task' => $this->task,
+            'task' => new TaskResource($this->task),
         ];
     }
 }

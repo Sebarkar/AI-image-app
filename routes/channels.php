@@ -10,3 +10,7 @@ Broadcast::channel('task.{id}', function (User $user) {
 Broadcast::channel('user.{id}', function (User $user) {
     return ['ably-capability' => ["subscribe", "history"]];
 });
+
+Broadcast::channel('model.{id}', function (User $user) {
+    return ['ably-capability' => ["subscribe", "history"]];
+});

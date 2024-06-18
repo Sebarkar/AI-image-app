@@ -2,12 +2,11 @@
 
 namespace App\Services\AIs\Interfaces;
 
+use App\Services\AIs\Instances\ModelInstance;
+use App\Services\AIs\Instances\Responses\PredictionResponseInstance;
+use App\Services\AIs\Providers\Replicate\Request\ReplicatePredictionRequest;
+
 interface SourceInterface
 {
-    public function init();
-    public function setPrompt($text, $tags, $options = []);
-    public function sendRequest();
-
-    public function getVariants();
-    public function isResultReady();
+    public function getAvailableModels();
 }

@@ -7,7 +7,6 @@ use eDiasoft\Midjourney\MidjourneyApiClient;
 
 class MidJourney implements SourceInterface
 {
-
     protected $provider;
     protected $text = '';
     protected $tags;
@@ -66,4 +65,13 @@ class MidJourney implements SourceInterface
         // TODO: Implement isResultReady() method.
     }
 
+    public function getName()
+    {
+        return 'midjourney';
+    }
+
+    public function createPrediction($data)
+    {
+        // TODO: Implement makePrediction() method.
+    }
 }

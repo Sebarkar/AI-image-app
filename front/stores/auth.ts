@@ -11,9 +11,9 @@ export const useAuthStore = defineStore('auth', () => {
         email_verified_at: string | Date | null;
     }
 
-    const user = auth.user.value as MyCustomUser | null
-
-    const isInitialRequestFinished = ref(false)
+    const user = computed(() => {
+        return auth.user.value as MyCustomUser | null
+    })
 
     const isAuthorized = computed(() => {
         return auth.isAuthenticated.value

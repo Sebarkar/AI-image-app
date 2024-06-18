@@ -1,7 +1,12 @@
 <script setup lang="ts">
+import {googleOneTap} from "vue3-google-login"
+import {tasks} from "nitropack/runtime/virtual/tasks";
+
 const guest = useGuestStore();
 const auth = useAuthStore();
+const datasets = useDatasetsStore();
 const modals = useModalsStore();
+const tasks = useTasksStore();
 const listener = useListenerStore();
 const route = useRoute();
 
@@ -23,6 +28,17 @@ watch(() => auth.user, (user) => {
 onMounted(() => {
     if (auth.user) {
         listener.register(auth.user);
+    } else {
+        if (route.meta.key === 'auth-sign-in' || route.meta.key === 'auth-sign-up')
+            return;
+        googleOneTap({autoLogin: true})
+            .then((response) => {
+                if (response.credential) {
+                    auth.login({provider: 'google-one-tap', code: response.credential})
+                } else {
+                    auth.login({provider: 'google', code: response.access_token})
+                }
+            })
     }
 });
 
@@ -42,14 +58,14 @@ onMounted(() => {
         </Head>
         <Body>
         <TheTopPanel v-if="route.meta.layout === 'default'"/>
-        <UNotifications/>
-        <UContainer>
+        <UNotifications :ui="{wrapper: 'z-[1001]'}"/>
+        <UContainer class="bg-v1primary-100">
             <NuxtLayout>
-                <NuxtPage/>
+                <NuxtPage />
             </NuxtLayout>
         </UContainer>
         <ModalsAuth :value="modals.isModalOpened('auth')"></ModalsAuth>
-        <USlideovers />
+        <USlideovers/>
         </Body>
         </Html>
     </div>

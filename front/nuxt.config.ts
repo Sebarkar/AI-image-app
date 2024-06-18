@@ -15,7 +15,7 @@ export default defineNuxtConfig({
             pusher_key: process.env.PUSHER_APP_KEY,
             pusher_cluster: process.env.PUSHER_APP_CLUSTER,
             debug: process.env.DEBUG,
-            ablyKey: process.env.ABLY_KEY,
+            googleId: process.env.GOOGLE_CLIENT_ID,
         }
     },
 
@@ -43,10 +43,11 @@ export default defineNuxtConfig({
     modules: [
         '@pinia/nuxt',
         '@nuxtjs/i18n',
+        'nuxt-swiper',
         '@nuxt/image',
         "@nuxt/ui",
         '@nuxtjs/google-fonts',
-        "nuxt-auth-sanctum"
+        "nuxt-auth-sanctum",
     ],
 
     googleFonts: {
@@ -63,6 +64,13 @@ export default defineNuxtConfig({
             login: '/api/auth/login',
             logout: '/api/auth/logout',
             user: '/api/auth/user',
+        },
+        redirect: {
+            keepRequestedRoute: true,
+            onLogin: '/',
+            onLogout: '/',
+            onAuthOnly: '/auth/sign-in',
+            onGuestOnly: '/',
         },
     },
 
@@ -96,5 +104,11 @@ export default defineNuxtConfig({
             ['defineStore', 'definePiniaStore'],
         ],
     },
+
+    css: [
+        './assets/css/tailwind.css',
+        './assets/css/transitions.css',
+        'vue-final-modal/style.css',
+    ],
 
 })

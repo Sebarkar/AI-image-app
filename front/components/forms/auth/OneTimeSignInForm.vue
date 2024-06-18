@@ -12,7 +12,7 @@ const emailSchema = object({
 })
 
 const codeSchema = object({
-    code: string().min(8).max(8).required(),
+    oneTimeCode: string().min(8).max(8).required(),
 })
 
 type emailSchema = InferType<typeof emailSchema>
@@ -25,7 +25,7 @@ const loading = ref(false);
 
 const state = reactive({
     email: undefined,
-    code: undefined,
+    oneTimeCode: undefined,
 })
 
 const isEmailSent = ref(false);
@@ -68,7 +68,7 @@ async function login() {
 </script>
 
 <template>
-    <div>
+    <div class="min-w-[280px] mb-10">
         <UAlert
             v-if="isEmailSent"
             class="mb-5"
@@ -79,31 +79,26 @@ async function login() {
             :title="$t('auth.text.We already sent email with confirmation code to your email. Please check your email and enter the confirmation code below.')"
             :description="$t('auth.text.Email used: ') + state.email"
         />
-        <UForm ref="emailForm" :schema="emailSchema" :state="state" class="space-y-4 min-w-[370px]" @submit="sendEmail" :validateOn="['input', 'submit']" v-if="!isEmailSent">
+        <UForm ref="emailForm" :schema="emailSchema" :state="state" class="space-y-4 " @submit="sendEmail" :validateOn="['input', 'submit']" v-if="!isEmailSent">
             <UFormGroup :label="$t('auth.text.Email')" name="email">
                 <UInput v-model="state.email"/>
             </UFormGroup>
             <div class="flex">
-                <UButton type="submit" :loading="loading">
+                <UButton type="submit" :loading="loading" block>
                     {{ $t('auth.text.Get one time password') }}
                 </UButton>
             </div>
         </UForm>
-        <UForm ref="codeForm" :schema="codeSchema" :state="state" class="space-y-4 min-w-[370px]" @submit="login" :validateOn="['input', 'submit']" v-else>
-            <UFormGroup :label="$t('auth.text.Confirmation Code')" name="code">
-                <UInput v-model="state.code"/>
+        <UForm ref="codeForm" :schema="codeSchema" :state="state" class="space-y-4 " @submit="login" :validateOn="['input', 'submit']" v-else>
+            <UFormGroup :label="$t('auth.text.Confirmation Code')" name="oneTimeCode">
+                <UInput v-model="state.oneTimeCode"/>
             </UFormGroup>
             <div class="flex">
-                <UButton type="submit" :loading="loading">
+                <UButton type="submit" :loading="loading" block>
                     {{ $t('auth.text.Confirm Code') }}
                 </UButton>
             </div>
         </UForm>
-        <div class="flex">
-            <UButton variant="link" @click="modals.closeModal('auth')" :to="localePath('/auth/sign-in')">
-                {{ $t('auth.text.back to sign in') }}
-            </UButton>
-        </div>
     </div>
 </template>
 

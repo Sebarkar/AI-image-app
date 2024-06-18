@@ -1,4 +1,5 @@
 import {defineStore} from 'pinia'
+
 export const useModalsStore = defineStore('modals', () => {
     const modals = ref([])
 
@@ -7,12 +8,14 @@ export const useModalsStore = defineStore('modals', () => {
     }
 
     const openModal = (title: string) => {
-        modals.value.push(title)
+        console.log(title)
+        return modals.value.includes(title) ? '' : modals.value.push(title);
     }
 
     const closeModal = (title: string) => {
         let index = modals.value.indexOf(title)
-        modals.value.splice(index, 1)
+        if (index > -1)
+            modals.value.splice(index, 1)
     }
 
     return {

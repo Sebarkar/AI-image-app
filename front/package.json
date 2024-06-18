@@ -11,20 +11,27 @@
     },
     "dependencies": {
         "@ably/laravel-echo": "^1.0.4",
+        "@healerlab/vue3-facebook-login": "^0.1.7",
         "@nuxt/image": "^1.7.0",
         "@nuxt/ui": "^2.15.2",
         "@nuxtjs/google-fonts": "^3.2.0",
         "@nuxtjs/i18n": "^8.3.0",
         "@pinia/nuxt": "^0.5.1",
         "@sidebase/nuxt-auth": "^0.7.0",
+        "@tinymce/tinymce-vue": "^4.0.7",
         "ably": "^1.2.50",
         "laravel-echo": "1.16.1",
         "nuxt": "^3.11.2",
         "nuxt-auth-sanctum": "^0.3.1",
+        "nuxt-swiper": "^1.2.2",
+        "nuxt-vue3-google-signin": "^0.0.11",
         "pinia": "^2.1.7",
         "pusher-js": "^8.3.0",
         "vue": "^3.4.21",
+        "vue-final-modal": "^4.5.4",
+        "vue-preview-imgs": "^2.0.1",
         "vue-router": "^4.3.0",
+        "vue3-google-login": "^2.0.26",
         "yup": "^1.4.0"
     }
 }

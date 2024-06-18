@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withProviders([
+        \GoogleOneTap\Services\GoogleOneTapServiceProvider::class,
+    ])
     ->withBroadcasting(
         __DIR__.'/../routes/channels.php',
         ['prefix' => 'api', 'middleware' => ['api']],

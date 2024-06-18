@@ -22,6 +22,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'google_id',
+        'google_token',
+        'facebook_id',
+        'facebook_token',
+        'surname',
+        'email_verified_at'
     ];
 
     public function hasRole($role) {

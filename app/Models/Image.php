@@ -2,9 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
-class Image extends Model
+class Image extends Files
 {
+    /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        static::addGlobalScope('type', function (Builder $builder) {
+            $builder->whereIn('extension', ['jpg', 'jpeg', 'png', 'gif']);
+        });
+    }
 
+    public function task()
+    {
+        return $this->belongsTo(Task::class);
+    }
 }

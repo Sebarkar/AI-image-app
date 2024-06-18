@@ -33,8 +33,27 @@ const settings = reactive({
 </script>
 
 <template>
-    <div class="container mx-auto relative">
+    <div class="relative pt-10 flex flex-col gap-y-20">
+        <div class="min-h-[80vh] px-5 pb-10 flex items-center justify-between relative">
+            <div class="max-w-xl flex flex-col gap-10 justify-end">
+                <h1 class="text-7xl">Lorem ipsum dolor sit amet. </h1>
+                <span class="text-xl">Cum dolore esse eveniet fuga illo impedit in laudantium neque odio perferendis quas sequi similique sit velit voluptatum!</span>
+                <div class="flex gap-x-3">
+                    <UButton class="uppercase font-bold tracking-widest">Try it now</UButton>
+                </div>
+            </div>
+            <div class="absolute right-0 inset-y-center w-1/2 bg-primary min-h-full"></div>
+        </div>
+
+        <div class="flex gap-x-5 flex-wrap justify-between">
+            <h2 class="w-full text-5xl py-10 text-center">Nostrum perferendis voluptatum?</h2>
+            <div class="w-1/4 min-h-60 h-full bg-red-100 rounded-2xl flex flex-center" v-for="i in 3">
+                <div>Lorem {{i}}</div>
+            </div>
+        </div>
+
         <h1>Index</h1>
+
         <div class="sticky top-0 p-4 bg-white">
             <UButton size="xl" class="mr-2" @click="sendRequest" color="success">send request</UButton>
             <UButton size="xl" @click="send404Request">send 404 request</UButton>
