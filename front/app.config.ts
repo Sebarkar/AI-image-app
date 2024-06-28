@@ -12,6 +12,7 @@ export default defineAppConfig({
             signUp: 'i-material-symbols-light-assignment-ind-outline-sharp',
             loading: 'i-heroicons-arrow-path-20-solid',
             upload: 'i-mdi-cloud-upload-outline',
+            await: 'i-pajamas-status-waiting',
         },
     },
     ui: {

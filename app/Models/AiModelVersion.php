@@ -25,8 +25,12 @@ class AiModelVersion extends Model
         'created_at',
         'model_id',
         'schema',
+        'target',
         'schema_version',
         'user_id',
+        'version_id',
         'schemas',
     ];
+
+
 }

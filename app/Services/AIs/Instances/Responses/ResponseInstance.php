@@ -5,6 +5,7 @@ namespace App\Services\AIs\Instances\Responses;
 class ResponseInstance
 {
     const STATUS_COMPLETED = 'completed';
+    const STATUS_SUCCEEDED = 'succeeded';
     const STATUS_CANCELED = 'canceled';
     const STATUS_RUNNING = 'running';
     const STATUS_FAILED = 'failed';
@@ -17,5 +18,6 @@ class ResponseInstance
         ResponseInstance::STATUS_FAILED,
         ResponseInstance::STATUS_CANCELED,
         ResponseInstance::STATUS_UNKNOWN,
+        ResponseInstance::STATUS_SUCCEEDED,
     ];
 }

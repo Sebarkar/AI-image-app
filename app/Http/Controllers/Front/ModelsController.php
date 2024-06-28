@@ -3,26 +3,23 @@
 namespace App\Http\Controllers\Front;
 
 use App\Events\Models\ModelsCreated;
-use App\Http\Resources\DatasetResource;
-use App\Http\Resources\ModelResource;
-use App\Models\AiModels;
-use App\Models\Datasets;
-use App\Models\Image;
 use App\Models\UserAiModel;
 use App\Services\AIs\AIClient;
 use App\Services\AIs\RequestHelper;
 use App\Services\Files\FileStorage;
 use App\Services\Forms\Model\CreateModelForm;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class ModelsController
 {
     public function index(Request $request)
     {
-        $models = RequestHelper::getPredictModels(false);
+        if ($request->json('search')) {
+            $models = RequestHelper::searchPredictModels($request->json('search'));
+        } else {
+            $models = RequestHelper::getPredictModels(false);
+        }
 
         return response()->json($models);
     }

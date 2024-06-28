@@ -64,4 +64,27 @@
         background-image: linear-gradient(135deg, rgb(var(--color-gray-200)) 10%, #0000 0, #0000 50%, rgb(var(--color-gray-200)) 0, rgb(var(--color-gray-200)) 60%, #0000 0, #0000);
         background-size: 10px 10px;
     }
+
+    .input_file {
+        @apply relative duration-150 mb-1 block w-full disabled:cursor-not-allowed disabled:opacity-75 focus:outline-none border-0 rounded-md placeholder-gray-400 dark:placeholder-gray-500 file:cursor-pointer file:rounded-l-md file:font-medium file:m-0 file:border-0 file:ring-1 file:py-2.5 file:px-3.5 file:ring-gray-300 dark:file:ring-gray-700 file:text-gray-900 dark:file:text-white file:mr-2 file:bg-gray-50  hover:file:bg-gray-100 dark:file:bg-gray-800 dark:hover:file:bg-gray-700/50 text-base shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white ring-1 ring-inset file:ring-inset ring-gray-300 dark:ring-gray-700 file:focus:ring-2 focus:ring-2 file:focus:ring-primary-500 focus:ring-primary-500 dark:focus:ring-primary-400;
+    }
+
+    .input_string {
+        @apply relative block w-full disabled:cursor-not-allowed disabled:opacity-75 focus:outline-none border-0 form-input rounded-md placeholder-gray-400 dark:placeholder-gray-500 text-base px-3.5 py-2.5 shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400;
+    }
+
+    ::-webkit-scrollbar {
+        @apply hover:w-2 w-1;
+        border: 1px solid rgb(var(--color-gray-950));
+    }
+
+    ::-webkit-scrollbar-track {
+        border-radius: 0;
+        background: #eeeeee;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 0;
+        background: rgb(var(--color-gray-950));
+    }
 }

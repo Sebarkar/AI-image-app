@@ -10,7 +10,7 @@ class StabilityAiSdxlPredict extends ModelInstance
      * @var string Input mask for inpaint mode. Black areas will be preserved, white areas will be inpainted.
      */
     public $mask = '';
-    public $seed = null;
+    public $seed;
     public $image = '';
     public $width = 1024;
     public $height = 1024;
@@ -20,6 +20,7 @@ class StabilityAiSdxlPredict extends ModelInstance
     public $lora_scale = 1;
     public $num_outputs = 1;
     public $refine_steps = 20;
+    private array $fieldsToModelWhenTrain = ['token_string'];
     public $guidance_scale = 7.5;
     public $apply_watermark = false;
     public $high_noise_frac = 0.8;
@@ -35,10 +36,12 @@ class StabilityAiSdxlPredict extends ModelInstance
         $model->user_fine_tune = true;
         $model->title = 'stability-ai/sdxl';
         $model->public = true;
+        $model->version_id = '7762fd07cf82c948538e41f63f77d685e02b063e37e496e96eefd46c929f9bdc';
         $model->type = 'image';
         $model->name = 'sdxl';
         $model->owner = 'stability-ai';
         $model->image = 'images/ais/sdxl-1.0.jpg';
+        $model->setFieldsToModelWhenTrain($instancePredict->fieldsToModelWhenTrain);
 
         if ($withForm) {
             $model->train = StabilityAiSdxlTrain::getDataProperties();
@@ -69,7 +72,7 @@ class StabilityAiSdxlPredict extends ModelInstance
             ],
             'image' => [
                 'visibility' => true,
-                'required' => true,
+                'required' => false,
                 'value' => $model->image,
                 'type' => 'file',
                 'allowed_types' => ['jpg', 'jpeg', 'png'],
@@ -124,7 +127,7 @@ class StabilityAiSdxlPredict extends ModelInstance
                 'required' => false,
                 'pro_field' => true,
                 'value' => $model->seed,
-                'type' => 'string',
+                'type' => 'number',
                 'description' => 'Seed for random number generator.',
             ],
             'refine' => [
@@ -154,8 +157,8 @@ class StabilityAiSdxlPredict extends ModelInstance
                 'value' => $model->lora_scale,
                 'type' => 'number',
                 'pro_field' => true,
-                'min' => 1,
-                'max' => 4,
+                'min' => 0.1,
+                'max' => 1,
                 'step' => 0.1,
                 'description' => 'LoRA additive scale. Only applicable on trained models.',
             ],
@@ -166,7 +169,7 @@ class StabilityAiSdxlPredict extends ModelInstance
                 'pro_field' => true,
                 'type' => 'number',
                 'min' => 0,
-                'max' => 9999,
+                'max' => 100,
                 'step' => 1,
                 'description' => 'For base_image_refiner, the number of steps to refine, defaults to num_inference_steps',
             ],
@@ -235,6 +238,4 @@ class StabilityAiSdxlPredict extends ModelInstance
 
         return $instance;
     }
-
-
 }

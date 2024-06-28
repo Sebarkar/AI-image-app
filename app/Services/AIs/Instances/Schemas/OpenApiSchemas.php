@@ -36,7 +36,7 @@ class OpenApiSchemas implements SchemaInterface
                 'visibility' => true,
                 'title' => $prop->title ?? $title,
                 'type' => $this->getType($prop, $title),
-                'value' => $prop->default ?? null,
+                'value' => $prop->default ?? '',
                 'description' => $prop->description ?? null,
                 'x-order' => $prop->$xOrderVariable,
                 ...$this->getTypeBasedFields($prop, $title, $prop->type ?? 'select')
@@ -66,7 +66,7 @@ class OpenApiSchemas implements SchemaInterface
                 'visibility' => true,
                 'title' => $prop->title ?? $title,
                 'type' => $this->getType($prop, $title),
-                'value' => $prop->default ?? null,
+                'value' => $prop->default ?? '',
                 'description' => $prop->description ?? null,
                 'x-order' => $prop->$xOrderVariable,
                 ...$this->getTypeBasedFields($prop, $title, $prop->type ?? 'select')
@@ -122,13 +122,13 @@ class OpenApiSchemas implements SchemaInterface
             case 'number':
                 return [
                     'min' => $input->minimum ?? 0,
-                    'max' => $input->maximum ?? null,
+                    'max' => $input->maximum ?? '',
                     'step' => isset($input->maximum) ? ($input->maximum > 4 ? 1 : 0.1) : null,
                 ];
             case 'integer':
                 return [
                     'min' => $input->minimum ?? 0,
-                    'max' => $input->maximum ?? null,
+                    'max' => $input->maximum ?? '',
                     'step' => 1,
                 ];
             case 'select':

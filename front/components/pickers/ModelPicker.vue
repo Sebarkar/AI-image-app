@@ -25,7 +25,7 @@ const loaded = computed(() => {
 
 <template>
     <div>
-        <div class="w-full px-2 py-2 bg-v1primary-950" >
+        <div class="w-full px-2 py-2 h-full" >
             <USkeleton v-if="!loaded" class="w-full h-14 z-10"/>
             <ElementsModelItem
                 class="h-14 z-10"
@@ -38,7 +38,7 @@ const loaded = computed(() => {
         <ModalsModalContainer
             v-model="isOpen"
             fullscreen
-            content-class="w-screen h-screen bg-v1primary-950"
+            content-class="w-screen h-screen bg-v1primary-950 "
             class-prop="w-screen h-screen"
             @close="modals.closeModal('select-model')"
         >
@@ -47,6 +47,12 @@ const loaded = computed(() => {
             </template>
             <div class="w-full bg-v1primary-950 rounded-none h-screen">
                 <div class="p-4 max-h-full grid grid-cols-10 select-none gap-10">
+                    <h3 class="col-span-10 tracking-widest text-white" >search</h3>
+                    <UInput
+                        class="col-span-10"
+                        placeholder="Search"
+                        v-model="models.search">
+                    </UInput>
                     <div v-for="(type, index) in models.preparedModels" class="col-span-10 grid grid-cols-10 gap-5 pb-20 ">
                         <TransitionGroup name="fade" tag="div" class="col-span-10 grid grid-cols-10 gap-5">
                         <div v-if="index === 'users'" class="col-span-4" key="fdsf">

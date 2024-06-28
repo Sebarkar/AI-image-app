@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Events\Task;
+namespace App\Events\Train;
 
 use App\Http\Resources\TaskResource;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -8,7 +8,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TaskStarted implements ShouldBroadcastNow
+class TrainFinished implements ShouldBroadcastNow
 {
     use Dispatchable, SerializesModels;
 
@@ -43,7 +43,7 @@ class TaskStarted implements ShouldBroadcastNow
      */
     public function broadcastAs()
     {
-        return 'task.started';
+        return 'train.finished';
     }
 
     /**
@@ -55,6 +55,7 @@ class TaskStarted implements ShouldBroadcastNow
     {
         return [
             'task' => new TaskResource($this->task),
+            'message' => __('messages.Train finished'),
         ];
     }
 }

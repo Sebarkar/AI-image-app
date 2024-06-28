@@ -1,27 +1,27 @@
 <?php
 
-namespace App\Events\Task;
+namespace App\Events\Models;
 
-use App\Http\Resources\TaskResource;
+use App\Http\Resources\DatasetResource;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TaskStatusChanged implements ShouldBroadcastNow
+class ModelsStatusUpdated implements ShouldBroadcastNow
 {
     use Dispatchable, SerializesModels;
 
-    public $task;
+    public $model;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($task)
+    public function __construct($model)
     {
-        $this->task = $task;
+        $this->model = $model;
     }
 
     /**
@@ -32,7 +32,7 @@ class TaskStatusChanged implements ShouldBroadcastNow
     public function broadcastOn()
     {
         return [
-            new PrivateChannel('task.' . $this->task->user_id),
+            new PrivateChannel('model.' . $this->model->user_id),
         ];
     }
 
@@ -43,7 +43,7 @@ class TaskStatusChanged implements ShouldBroadcastNow
      */
     public function broadcastAs()
     {
-        return 'task.changed';
+        return 'model.updated';
     }
 
     /**
@@ -54,7 +54,8 @@ class TaskStatusChanged implements ShouldBroadcastNow
     public function broadcastWith()
     {
         return [
-            'task' => new TaskResource($this->task),
+            'id' => $this->model->id,
+            'message' => __('messages.Model status changed'),
         ];
     }
 }

@@ -45,12 +45,12 @@ const emit = defineEmits<{
             <div class="flex flex-col justify-between h-full">
                 <div
                     class="flex items-center justify-between p-4 md:p-5"
-                    :class="{'border-b rounded-t dark:border-gray-600': !fullscreen}"
+                    :class="{'border-b rounded-t dark:border-gray-600': !fullscreen, 'bg-transparent': fullscreen}"
                 >
                     <slot name="header"/>
                     <UButton icon="close" variant="ghost" @click="emit('close')"/>
                 </div>
-                <div class="py-4 md:py-5 space-y-4">
+                <div class="space-y-4">
                     <div class="w-full px-4 md:px-5 overflow-y-auto">
                         <slot/>
                     </div>

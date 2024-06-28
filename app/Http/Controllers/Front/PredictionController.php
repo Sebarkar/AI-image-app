@@ -2,27 +2,33 @@
 
 namespace App\Http\Controllers\Front;
 
-use App\Events\Task\TaskFinished;
-use App\Events\Task\TaskStarted;
-use App\Events\Task\TaskStatusChanged;
-use App\Jobs\GenerateVariants;
+use App\Events\Predict\PredictStarted;
 use App\Jobs\Predict;
-use App\Jobs\SaveImages;
-use App\Models\Datasets;
-use App\Services\AIs\AIClient;
-use App\Services\AIs\Instances\Responses\PredictionResponseInstance;
 use App\Services\AIs\Instances\Responses\ResponseInstance;
-use App\Services\Files\FileStorage;
+use App\Services\AIs\RequestHelper;
+use App\Services\Forms\FormInstance;
 use Illuminate\Http\Request;
 use App\Models\Task;
-use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class PredictionController
 {
     public function predict(Request $request)
     {
+        $model = RequestHelper::getPredictModel($request->get('model_name'), $request->get('model_owner'));
+
+        $typeBasedInput = FormInstance::getTypeBasedInput(formWithTypes: $model->predict, input: $request->all());
+
+
+        $validator = Validator::make($typeBasedInput, FormInstance::makeValidatorsFromForm($model->predict));
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
         $task = Task::create([
             'user_id' => $request->user()->id,
             'provider' => 'replicate',
@@ -30,26 +36,28 @@ class PredictionController
             'status' => ResponseInstance::STATUS_AWAITING
         ]);
 
-        $dataset = Datasets::where('user_id', $request->user()->id)->where('id', $request->json('selectedDataset.id'))->first();
+        //Save and add files link to input
+        $typeBasedInputWithFilesLinks = FormInstance::getFilesLinksFromInput(
+            formWithTypes: $model->predict,
+            input: $typeBasedInput,
+            target: $request->user(),
+            targetType: 'request'
+        );
 
         $task->update([
             'data' => [
-                'model' => $dataset->model,
-                'model_owner' => $dataset->model_owner,
-                'model_id' => $dataset->version,
+                'model_title' => $model->title,
+                'version_id' => $model->version_id,
                 'webhook' => env('WEBHOOK_URL') . '/api/v1/task-webhook/' . $task->id,
                 'stream' => env('WEBHOOK_URL') . '/api/v1/task-webhook/' . $task->id,
-                'input' => $request->json()->all(),
-            ]
+                'input' => $typeBasedInputWithFilesLinks
+            ],
         ]);
 
-        AIClient::provider($task->provider)->createPrediction($task->data);
-
-        TaskStarted::dispatch($task);
+        PredictStarted::dispatch($task);
 
         Bus::chain([
             new Predict($task),
-            new SaveImages($task),
         ])->dispatch();
 
         return response()->json($task);

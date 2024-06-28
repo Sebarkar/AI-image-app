@@ -2,22 +2,17 @@
 
 namespace App\Jobs;
 
-use App\Events\Task\TaskFinished;
-use App\Events\Task\TaskStatusChanged;
+use App\Events\Predict\PredictStatusChanged;
 use App\Models\Bots\Bot;
 use App\Services\AIs\AIClient;
-use App\Services\AIs\Instances\Responses\PredictionResponseInstance;
-use App\Services\Image\ImageProcessor;
+use App\Services\AIs\Instances\Responses\ResponseInstance;
 use Carbon\Carbon;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\RateLimited;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Storage;
 
 class Predict implements ShouldQueue
 {
@@ -52,24 +47,25 @@ class Predict implements ShouldQueue
     public function handle()
     {
         $bot = Bot::where('provider', $this->task->provider)->where('connection_left', '>', 0)->first();
-
         if (!$bot) {
             $this->release(10);
         }
-
         $bot->increment('connections');
-        $result = AIClient::provider($this->task->provider)->createPrediction($this->task->data);
+
+        $data = $this->task->data;
+
+        $result = AIClient::provider($this->task->provider)->createPrediction($data);
 
         $this->task->update([
-            'status' => PredictionResponseInstance::STATUS_RUNNING,
+            'status' => ResponseInstance::STATUS_RUNNING,
             'provider_id' => $result->id,
             'last_response' => $result,
         ]);
 
-        TaskStatusChanged::dispatch($this->task);
+        PredictStatusChanged::dispatch($this->task);
 
-        $this->task->finished_at = now();
-        $this->task->save();
+//        $this->task->finished_at = now();
+//        $this->task->save();
 
         $bot->decrement('connections');
     }

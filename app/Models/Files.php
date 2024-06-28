@@ -16,6 +16,7 @@ class Files extends Model
         'storage_path',
         'storage',
         'target',
+        'hash',
         'extension',
     ];
 

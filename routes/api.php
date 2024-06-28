@@ -53,15 +53,15 @@ Route::prefix('v1')->group(function () {
         });
     });
 
-    //User routes
+    //User front routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('test', [IndexController::class, 'index']);
         Route::post('train', [TrainController::class, 'train']);
         Route::post('predict', [PredictionController::class, 'predict']);
 
-        Route::post('create-dataset', [DatasetsController::class, 'create']);
-        Route::post('datasets', [DatasetsController::class, 'index']);
-        Route::post('tasks', [TaskController::class, 'index']);
+        Route::post('tasks-predict', [TaskController::class, 'indexPredict']);
+        Route::post('tasks-train', [TaskController::class, 'indexTrain']);
+
         Route::post('remove-datasets', [DatasetsController::class, 'bulkRemove']);
 
         //MODELS

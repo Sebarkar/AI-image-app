@@ -24,7 +24,10 @@ export const useImagesStore = defineStore('images', () => {
         })
     })
 
+    const selectedImage = ref(null);
+
     return {
-        preparedImages
+        preparedImages,
+        selectedImage
     };
 })

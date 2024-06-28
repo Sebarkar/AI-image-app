@@ -11,9 +11,9 @@ class TencentarcPhotomakerPredict extends ModelInstance
      * @var string Input mask for inpaint mode. Black areas will be preserved, white areas will be inpainted.
      */
     public $input_image;
-    public $input_image2;
-    public $input_image3;
-    public $input_image4;
+    public $input_image2 = '';
+    public $input_image3 = '';
+    public $input_image4 = '';
     public $prompt = 'A photo of a scientist img receiving the Nobel Prize';
     public $style_name = 'Photographic (Default)';
     public $negative_prompt = 'nsfw, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry';
@@ -30,6 +30,7 @@ class TencentarcPhotomakerPredict extends ModelInstance
         $model = new ModelInstance();
         $model->user_fine_tune = false;
         $model->public = true;
+        $model->version_id = 'ddfc2b08d209f9fa8c1eca692712918bd449f695dabb4a958da31802a9570fe4';
         $model->title = 'tencentarc/photomaker';
         $model->name = 'photomaker';
         $model->owner = 'tencentarc';
@@ -37,10 +38,25 @@ class TencentarcPhotomakerPredict extends ModelInstance
         $model->image = 'images/ais/tencentarc-photomaker.jpg';
 
         if ($withForm) {
-            $model->form = $instancePredict->getPredictForm();
+            $model->predict = $instancePredict->getPredictForm();
+            $model->predict_settings = $instancePredict->getPredictSettings();
         }
 
         return $model;
+    }
+
+    public function getPredictSettings() : array
+    {
+        return [
+            'pluck' => [
+                'input_images' => [
+                    'description' => 'Add images for',
+                    'fields' => ['input_image', 'input_image2', 'input_image3', 'input_image4'],
+                    'as' => 'images',
+                    'x-order' => 0,
+                ]
+            ],
+        ];
     }
 
     public function getPredictForm()
@@ -50,6 +66,7 @@ class TencentarcPhotomakerPredict extends ModelInstance
             'input_image' => [
                 'visibility' => true,
                 'required' => true,
+                'hidden' => true,
                 'value' => $model->input_image,
                 'allowed_types' => ['jpg', 'jpeg', 'png'],
                 'type' => 'file',
@@ -58,6 +75,7 @@ class TencentarcPhotomakerPredict extends ModelInstance
             'input_image2' => [
                 'visibility' => true,
                 'required' => false,
+                'hidden' => true,
                 'value' => $model->input_image2,
                 'allowed_types' => ['jpg', 'jpeg', 'png'],
                 'type' => 'file',
@@ -66,6 +84,7 @@ class TencentarcPhotomakerPredict extends ModelInstance
             'input_image3' => [
                 'visibility' => true,
                 'required' => false,
+                'hidden' => true,
                 'value' => $model->input_image3,
                 'allowed_types' => ['jpg', 'jpeg', 'png'],
                 'type' => 'file',
@@ -74,6 +93,7 @@ class TencentarcPhotomakerPredict extends ModelInstance
             'input_image4' => [
                 'visibility' => true,
                 'required' => false,
+                'hidden' => true,
                 'value' => $model->input_image4,
                 'allowed_types' => ['jpg', 'jpeg', 'png'],
                 'type' => 'file',

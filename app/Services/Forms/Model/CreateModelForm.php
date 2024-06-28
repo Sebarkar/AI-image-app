@@ -2,13 +2,12 @@
 
 namespace App\Services\Forms\Model;
 
-use App\Services\Forms\ValidatorConstructor;
+use App\Services\Forms\FormInstance;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Validation\Rule;
 
-class CreateModelForm
+class CreateModelForm extends FormInstance
 {
-    use ValidatorConstructor;
 
     public $title = '';
     public $description = '';

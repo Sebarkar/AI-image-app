@@ -1,26 +1,48 @@
 import {defineStore} from 'pinia'
+
 export const useListenerStore = defineStore('listener', () => {
     const auth = useAuthStore();
     const tasks = useTasksStore();
-    const dataset = useDatasetsStore();
     const models = useModelsStore();
+
+    const dragListener = ref([]);
+
+    function setDragTarget(target) {
+        dragListener.value.push(target);
+    }
+
+    function stopDragging(target) {
+        dragListener.value.splice(dragListener.value.indexOf(target), 1);
+    }
+
+    function isDragging(target) {
+        return dragListener.value.includes(target);
+    }
+
     const register = async (user) => {
         Echo.private(`task.${user.id}`)
-            .listen(`.dataset.finished`, (e) => {
+            //PREDICT
+            .listen(`.predict.finished`, (e) => {
                 console.log(e, 'ds');
-                dataset.changeDataset(e.task);
+                tasks.changeTask(e.task, e.message);
             })
-            .listen(`.task.finished`, (e) => {
+            .listen(`.predict.changed`, (e) => {
                 console.log(e, 'ds');
-                tasks.changeTask(e.task);
+                tasks.changeTask(e.task, e.message);
             })
-            .listen(`.task.changed`, (e) => {
+            .listen(`.predict.started`, (e) => {
                 console.log(e, 'ds');
-                tasks.changeTask(e.task);
+                tasks.addTask(e.task, e.message);
             })
-            .listen(`.task.started`, (e) => {
-                console.log(e, 'ds');
-                tasks.addTask(e.task);
+            //TRAIN
+            .listen(`.train.started`, (e) => {
+                models.changeUserModel(e.task.model_id, e.message);
+            })
+            .listen(`.train.updated`, (e) => {
+                models.changeUserModel(e.task.model_id, e.message);
+            })
+            .listen(`.train.finished`, (e) => {
+                models.changeUserModel(e.task.model_id, e.message);
             });
         Echo.private(`user.${user.id}`)
             .listen(`.auth.verified`, () => {
@@ -30,12 +52,15 @@ export const useListenerStore = defineStore('listener', () => {
             });
         Echo.private(`model.${user.id}`)
             .listen(`.model.created`, (e) => {
-                console.log(e, 'created model');
-                models.addUserModel(e.id);
-            });
+                models.addUserModel(e.model_id, e.message);
+            })
     }
 
     return {
         register,
+        isDragging,
+        stopDragging,
+        setDragTarget,
+        dragListener
     };
 })

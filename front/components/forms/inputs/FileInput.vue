@@ -1,9 +1,10 @@
 <script setup lang="ts">
 
+const listener = useListenerStore()
 const input = ref(null)
 
 const emits = defineEmits<{
-    (e: 'input'): void
+    (e: 'input', v: File | string | null): void
 }>()
 
 function getURL(image) {
@@ -20,24 +21,87 @@ function addImage(image) {
     currentImageUrl.value = getURL(image[0])
 }
 
+function setFile(file) {
+    currentImageUrl.value = getURL(file)
+}
+
+function setUrl(url) {
+    currentImageUrl.value = url
+}
+
 function removeFile() {
     emits('input', null)
+    fileUrl.value = ''
+    type.value = 'file'
     currentImageUrl.value = ''
     input.value.value = null
 }
+
+// Create `active` state and manage it with functions
+let active = ref(false)
+let inActiveTimeout = null // add a variable to hold the timeout key
+
+function setActive() {
+    clearTimeout(inActiveTimeout) // clear the timeout
+}
+
+function setInactive() {
+    inActiveTimeout = setTimeout(() => {
+        active.value = false
+    }, 50)
+}
+
+const type = ref('file')
+const fileUrl = ref('')
+
+
+function onDrop(e) {
+    if (e.dataTransfer.getData('text/plain')) {
+        setUrl(e.dataTransfer.getData('text/plain'))
+        fileUrl.value = e.dataTransfer.getData('text/plain')
+        type.value = 'text'
+        emits('input', fileUrl.value)
+    } else {
+        addImage(e.dataTransfer.files)
+    }
+    setInactive() // add this line too
+}
+
+watch(() => listener.dragListener.length, () => active.value = listener.isDragging('input_image'))
+
+defineExpose({
+    setFile,
+    removeFile
+})
 </script>
 
 <template>
-    <div class="w-full">
+    <div
+        class="flex gap-2 flex-wrap relative mb-5 py-2 w-full h-full"
+        :data-active="active"
+        @dragenter.prevent="setActive"
+        @dragover.prevent="setActive"
+        @drop.prevent="onDrop"
+    >
         <input
-            type="file"
+            :type="type"
+            :value="fileUrl"
             ref="input"
             @change="addImage($event.target.files)"
-            class="relative mb-1 block w-full disabled:cursor-not-allowed disabled:opacity-75 focus:outline-none border-0 rounded-md placeholder-gray-400 dark:placeholder-gray-500 file:cursor-pointer file:rounded-l-md file:font-medium file:m-0 file:border-0 file:ring-1 file:py-2.5 file:px-3.5 file:ring-gray-300 dark:file:ring-gray-700 file:text-gray-900 dark:file:text-white file:mr-2 file:bg-gray-50  hover:file:bg-gray-100 dark:file:bg-gray-800 dark:hover:file:bg-gray-700/50 text-base pr-3.5 shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white ring-1 ring-inset file:ring-inset ring-gray-300 dark:ring-gray-700 file:focus:ring-2 focus:ring-2 file:focus:ring-primary-500 focus:ring-primary-500 dark:focus:ring-primary-400"
+            :class="{
+                'file:w-full file:bg-stripes input_file file:text-transparent': active,
+                'pr-3.5': !active,
+                'input_file': type === 'file',
+                'input_string': type === 'text'
+            }"
             name="files"
             id="files"
             accept="image/*"
         >
+        <div class="absolute inset-center flex flex-center text-md w-full text-v1secondary font-bold" v-show="active">
+            <UIcon name="upload" class="w-5 h-5 mr-2"/>
+            {{ $t('input.text.drag file available') }}
+        </div>
         <Transition name="fade" tag="div">
             <div class="w-full aspect-square relative" v-if="currentImageUrl">
                 <UButton size="xs" color="error" @click="removeFile"

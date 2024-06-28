@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Events\Task\TaskFinished;
+use App\Events\Train\PredictFinished;
 use App\Models\Bots\Bot;
 use App\Services\Image\ImageProcessor;
 use Carbon\Carbon;
@@ -87,6 +87,6 @@ class GenerateVariants implements ShouldQueue
         $this->task->save();
 
         $bot->decrement('connections');
-        TaskFinished::dispatch($this->task, 'finish');
+        PredictFinished::dispatch($this->task, 'finish');
     }
 }

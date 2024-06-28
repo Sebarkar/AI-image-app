@@ -7,18 +7,34 @@ export const useModelsStore = defineStore('models', () => {
     const toast = useToast()
     const {t} = useI18n()
 
-    function load() {
+    function load(search = '') {
         useApiFetch('models', {
             method: 'POST',
+            body: {
+                search: search
+            }
         }).then((data) => {
-            data.forEach((model) => {
-                models.value.push(model)
-            })
-            if (models.value.length > 0) {
-                return selectModel(models.value[0])
+            if (search) {
+                models.value = data
+            } else {
+                data.forEach((model) => {
+                    models.value.push(model)
+                })
+                if (models.value.length > 0) {
+                    return selectModel(models.value[0])
+                }
             }
         })
     }
+
+    const search = ref('')
+
+    watch(() => search.value, (value) => {
+        setTimeout(() => {
+            if (value !== search.value) return
+            load(value)
+        }, 1000);
+    })
 
     const preparedModels = computed(() => {
         let array = {
@@ -51,15 +67,32 @@ export const useModelsStore = defineStore('models', () => {
 
     const selectedModel = ref(null)
 
-    async function addUserModel(id: number) {
-        return useApiFetch('get-user-model', {
+    async function addUserModel(id: number, message : string) {
+        return await loadUserModel(id).then((data) => {
+            models.value.push(data)
+            toast.add({color: 'green', title: message, icon: 'i-clarity-success-standard-line'})
+        })
+    }
+
+    async function loadUserModel(id: number) {
+        return await useApiFetch('get-user-model', {
             method: 'POST',
             body: {
                 'model_id': id,
             }
-        }).then((data) => {
-            models.value.push(data)
-            toast.add({color: 'green', title: t('models.text.model created'), icon: 'i-clarity-success-standard-line'})
+        })
+    }
+
+    async function changeUserModel(id: number, message : string) {
+        return await loadUserModel(id).then((data) => {
+            let index = models.value.findIndex(model => model.id === id)
+            if (index !== -1) {
+                models.value.splice(index, 1, data)
+            }
+            if (isModelSelected(data)) {
+                selectedModel.value = data
+            }
+            toast.add({color: 'green', title: message, icon: 'i-clarity-success-standard-line'})
         })
     }
 
@@ -100,6 +133,8 @@ export const useModelsStore = defineStore('models', () => {
         selectedModel,
         preparedModels,
         addUserModel,
+        changeUserModel,
+        search,
         isModelSelected,
         selectModel,
         train,

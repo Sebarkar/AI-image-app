@@ -15,3 +15,21 @@
 .list-leave-active {
     position: absolute!important;
 }
+
+.list-left-move, /* apply transition to moving elements */
+.list-left-enter-active,
+.list-left-leave-active {
+    transition: all 0.5s ease;
+}
+
+.list-left-enter-from,
+.list-left-leave-to {
+    opacity: 0;
+    transform: translateX(10px);
+}
+
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.list-left-leave-active {
+    position: absolute!important;
+}

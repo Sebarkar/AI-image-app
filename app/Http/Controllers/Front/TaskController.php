@@ -14,10 +14,23 @@ use Illuminate\Validation\Rule;
 
 class TaskController
 {
-    public function index(Request $request)
+    public function indexPredict(Request $request)
     {
         $tasks = Task::where('user_id', $request->user()->id)
             ->with('images')
+            ->where('type', 'predict')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        return response()->json(TaskResource::collection($tasks));
+    }
+
+    public function indexTrain(Request $request)
+    {
+        $tasks = Task::where('user_id', $request->user()->id)
+            ->with('images')
+            ->where('type', 'train')
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();

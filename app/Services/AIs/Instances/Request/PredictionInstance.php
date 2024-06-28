@@ -27,7 +27,7 @@ class PredictionInstance
      * @var string $id
      * The ID of the version.
      */
-    public string $model_id;
+    public string $version_id;
 
     public static function parse(array $data) {
         $instance = new self();

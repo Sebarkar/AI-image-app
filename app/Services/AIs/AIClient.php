@@ -3,6 +3,7 @@
 namespace App\Services\AIs;
 
 use App\Services\AIs\Instances\DataAiRequest;
+use App\Services\AIs\Instances\Request\UserVersionRequest;
 use App\Services\AIs\Instances\Responses\PredictionResponseInstance;
 use App\Services\AIs\Instances\Responses\TrainResponseInstance;
 
@@ -19,6 +20,16 @@ class AIClient
             throw new \Exception("Unsupported provider: $providerName");
         }
         return $object;
+    }
+
+    public function getUserVersion(UserVersionRequest $data)
+    {
+        return $this->provider->getUserVersion($data);
+    }
+
+    public function saveUserModelVersion($data, $target_id)
+    {
+        return $this->provider->saveUserModelVersion($data, $target_id);
     }
 
     public function createPrediction(array $data) : PredictionResponseInstance

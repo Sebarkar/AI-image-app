@@ -10,7 +10,7 @@ class DataAiRequest
     public $model_owner;
     public $webhook;
     public $webhook_events_filter;
-    public $model_id;
+    public $version_id;
     public $prompt;
 
     public static function parse(array $data) {

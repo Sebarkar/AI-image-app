@@ -49,9 +49,12 @@ class SaveImages implements ShouldQueue
         }
 
         $images = $this->task->last_response['output'];
+        Log::info('SaveImages', [$images]);
         if ($images) {
-            foreach ($this->task->last_response['output'] as $image) {
-                Log::info('SaveImages', [$image]);
+            if (!is_array($images)) {
+                $images = [$images];
+            }
+            foreach ($images as $image) {
                 FileStorage::storeImageFromAiResponse($image, $this->task);
             }
         }

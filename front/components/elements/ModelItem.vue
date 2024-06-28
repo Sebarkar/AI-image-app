@@ -63,11 +63,11 @@ const emits = defineEmits({
             }"
         >
             <span
-                class="uppercase font-bold break-words group-hover:text-white/75 duration-150 text-2xs w-full px-2 bg-v1primary-950 text-white">
+                class="uppercase font-bold break-words group-hover:text-white/75 duration-150 text-2xs w-full px-2 text-white">
                 {{ model.owner }}
             </span>
             <span
-                class="uppercase font-bold break-words group-hover:text-white/75 duration-150 text-xs w-full px-2 bg-v1primary-950 text-white">
+                class="uppercase font-bold break-words group-hover:text-white/75 duration-150 text-xs w-full px-2 text-white">
                 {{ model.name }}
             </span>
         </div>

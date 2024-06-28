@@ -33,7 +33,7 @@ class PredictionResponse extends PredictionResponseInstance implements Predictio
     {
         if ($status === 'starting' || $status === 'processing') {
             $this->status = self::STATUS_RUNNING;
-        } elseif ($status === 'succeeded') {
+        } elseif ($status === 'succeeded' || $status === 'unknown' || $status === 'completed') {
             $this->status = self::STATUS_COMPLETED;
         } elseif ($status === 'canceled') {
             $this->status = self::STATUS_CANCELED;

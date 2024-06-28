@@ -1,11 +1,25 @@
 <!--Form Wrapper to Build form with Api Interface-->
 <script setup lang="ts">
 
-import {type InferType, number, object, string, boolean} from "yup";
+import {type InferType, number, object, string, boolean, array} from "yup";
 
 const props = defineProps({
-    fields: Object,
-    endpoint: String,
+    fields: {
+        type: Object,
+        required: true,
+    },
+    endpoint: {
+        type: String,
+        required: true,
+    },
+    //Settings for the form construct
+    settings: {
+        type: Array,
+    },
+    //Add some data to the formData object
+    additionalData: {
+        type: Object,
+    },
 })
 
 const models = useModelsStore()
@@ -20,12 +34,14 @@ const schema = computed(() => {
             obj[key] = string().nullable();
         } else if (['number'].includes(value.type)) {
             if (value.max && value.min) {
-                obj[key] = number().positive().max(value.max).min(value.min);
+                obj[key] = number().positive().transform((value) => Number.isNaN(value) ? null : value).max(value.max).min(value.min);
             } else {
-                obj[key] = number().nullable();
+                obj[key] = number().transform((value) => Number.isNaN(value) ? null : value).nullable();
             }
         } else if (['boolean'].includes(value.type)) {
             obj[key] = boolean();
+        } else if (['files'].includes(value.type)) {
+            obj[key] = array().min(1);
         }
         if (obj[key] && value.required === true) {
             obj[key] = obj[key].required();
@@ -35,26 +51,27 @@ const schema = computed(() => {
 })
 
 const state = reactive({});
+const preparedFields = ref([]);
 
-function getURL(image) {
-    if (image) {
-        return URL.createObjectURL(image)
-    }
-    return ''
+function clearDataForm() {
+    for (let member in state) delete state[member];
+    filesErrors.value = {}
+    files.value = {}
+    showMore.value = false;
 }
 
-watch(() => props.fields, (array) => {
-    showMore.value = false;
+function setState() {
+    clearDataForm()
+    preparedFields.value = props.fields
     for (const [key, value] of Object.entries(props.fields)) {
         state[key] = value.value
     }
-})
+    setSettings();
+}
 
-onMounted(() => {
-    for (const [key, value] of Object.entries(props.fields)) {
-        state[key] = value.value
-    }
-})
+watch(() => props.fields, () => setState())
+onMounted(() => setState())
+
 
 const emits = defineEmits({
     'saved': (state: any) => {
@@ -81,24 +98,78 @@ async function saveForm() {
     }).catch((e) => {
         loading.value = false
         if (e.data.errors) {
-            form.value.setErrors(Object.keys(e.data.errors).map((name) => ({
-                message: e.data.errors[name][0],
-                path: name,
-            })))
+            setErrors(e.data.errors)
         }
     })
+}
+
+function showAdditionalData(field) {
+    if (!field.show_token) {
+        return false;
+    }
+    if (models.selectedModel && datasets.selectedDataset && models.selectedModel.data) {
+        return true;
+    }
+}
+
+//filesErrors allows pass errors directly to the files inputs component
+const filesErrors = ref({})
+
+function setErrors(errors) {
+    let errorsInFiles = {}
+    form.value.setErrors(Object.keys(errors).map((name) => {
+        let error;
+
+        if (name.includes('.')) {
+            if (!errorsInFiles.hasOwnProperty(name.split('.')[0])) {
+                errorsInFiles[name.split('.')[0]] = [];
+            }
+            errorsInFiles[name.split('.')[0]].push({
+                message: errors[name][0],
+                path: name.split('.')[1],
+            })
+            error = {
+                message: errors[name][0],
+                path: name.split('.')[0],
+            }
+        } else {
+            error = {
+                message: errors[name][0],
+                path: name,
+            }
+        }
+        return error;
+    }))
+
+    filesErrors.value = Object.assign({}, errorsInFiles)
+}
+
+function removeError(fieldName) {
+    form.value.setErrors(form.value.errors.filter(error => error.path !== fieldName));
 }
 
 function fillFormData() {
     const data = new FormData();
     for (const [key, value] of Object.entries(state)) {
-        data.append(key, value);
+        if (Array.isArray(value)) {
+            value.forEach((item, index) => {
+                data.append(`${key}[${index}]`, item);
+            })
+        } else {
+            data.append(key, value);
+        }
+    }
+    if (props.additionalData) {
+        for (const [key, value] of Object.entries(props.additionalData)) {
+            data.append(key, value);
+        }
     }
     return data;
 }
 
-function addImage(image, fieldName) {
+function addImage(fieldName, image) {
     state[fieldName] = image;
+    removeError(fieldName);
 }
 
 const onSubmit = () => {
@@ -117,6 +188,7 @@ const onError = (error: any) => {
 }
 
 const showMore = ref(false)
+const files = ref({})
 
 async function validate() {
     return await form.value.validate()
@@ -125,6 +197,34 @@ async function validate() {
 function setPreset(preset) {
     for (const [key, value] of Object.entries(preset)) {
         state[key] = value
+    }
+}
+
+function setSettings() {
+    if (!props.settings) {
+        return
+    }
+    for (const [key, value] of Object.entries(props.settings)) {
+        if (key === 'pluck') {
+            for (const [key1, value1] of Object.entries(value)) {
+                preparedFields.value = Object.assign({[key1]: value1}, preparedFields.value);
+            }
+        }
+    }
+}
+
+function addImages(field, images) {
+    if (preparedFields.value[field]['type'] === 'files') {
+        state[field] = images
+    } else {
+        preparedFields.value[field]['fields'].forEach((field, index) => {
+            files.value[field].setFile(null)
+            state[field] = ""
+            if (images[index]) {
+                files.value[field].setFile(images[index])
+                state[field] = images[index]
+            }
+        })
     }
 }
 
@@ -143,7 +243,7 @@ defineExpose({
            :schema="schema"
            @error="onError"
     >
-        <div v-for="(field, key) in fields" class="w-full">
+        <div v-for="(field, key) in preparedFields" class="w-full">
             <UDivider
                 v-if="field.type === 'separator'"
                 :label="(showMore ? $t('input.text.Hide') : $t('input.text.Show')) + ' ' + field.description"
@@ -151,8 +251,16 @@ defineExpose({
                 @click="showMore = !showMore"
                 class="cursor-pointer py-5"
             />
-            <div v-if="!field.pro_field || (field.pro_field === true && showMore)" class="w-full">
-                <UFormGroup :label="key" :name="key" v-if="field.type === 'select'">
+            <div v-if="!field.pro_field || (field.pro_field === true && showMore)" v-show="!field.hidden"
+                 class="w-full">
+                <UFormGroup :label="key" :name="key" v-if="field.as">
+                    <template #description>
+                        <UIcon name="info"/>
+                        {{ field.description }}
+                    </template>
+                    <FormsInputsMultipleFilesInput @input="addImages(key, $event)" v-if="field.as === 'images'"/>
+                </UFormGroup>
+                <UFormGroup :label="key" :name="key" v-else-if="field.type === 'select'">
                     <template #description>
                         <UIcon name="info"/>
                         {{ field.description }}
@@ -163,7 +271,7 @@ defineExpose({
                         :options="field.options"
                     />
                 </UFormGroup>
-                <UFormGroup :label="key" :name="key" v-if="field.type === 'setting_presets'">
+                <UFormGroup :label="key" :name="key" v-else-if="field.type === 'setting_presets'">
                     <template #description>
                         <UIcon name="info"/>
                         {{ field.description }}
@@ -175,12 +283,12 @@ defineExpose({
                             @click="setPreset(item.presets); state[key] = title"
                         >
                             <div class="w-full pt-[100%] relative rounded-2xl border-2 overflow-hidden duration-150"
-                            :class="{ ' border-success-600': title === state[key], ' border-transparent': title === state[key]}"
+                                 :class="{ ' border-success-600': title === state[key], ' border-transparent': title === state[key]}"
                             >
                                 <ElementsImage :src="item.src" class="w-full h-full absolute top-0 left-0"/>
                             </div>
                             <div class="w-full text-center text-sm py-2 font-bold">
-                                {{title}}
+                                {{ title }}
                             </div>
                         </div>
                     </div>
@@ -200,14 +308,14 @@ defineExpose({
                         <UIcon name="info"/>
                         {{ field.description }}
                     </template>
-                    <FormsInputsFileInput @input="addImage($event, key)" />
+                    <FormsInputsFileInput @input="addImage(key, $event)" :ref="(el) => files[key] = el"/>
                 </UFormGroup>
                 <UFormGroup :label="key" :name="key" v-else-if="field.type === 'files'" class="max-w-full">
                     <template #description>
                         <UIcon name="info"/>
                         {{ field.description }}
                     </template>
-                    <FormsInputsMultipleFilesInput @input="state[key] = $event" />
+                    <FormsInputsMultipleFilesInput @input="addImages(key, $event)" :errors="filesErrors[key]"/>
                 </UFormGroup>
                 <UFormGroup :label="key" :name="key" v-else-if="field.type === 'boolean'" class="max-w-full">
                     <template #description>
@@ -229,7 +337,8 @@ defineExpose({
                             :placeholder="field.placeholder"
                         />
                     </UTooltip>
-                    <URange v-if="field.max" color="primary" placeholder="Search..." v-model="state[key]" :max="field.max" :min="field.min" :step="field.step" />
+                    <URange v-if="field.max" color="primary" placeholder="Search..." v-model="state[key]"
+                            :max="field.max" :min="field.min" :step="field.step"/>
                 </UFormGroup>
                 <UFormGroup :label="key" :name="key" v-else-if="field.type === 'textarea'">
                     <template #description>
@@ -241,10 +350,13 @@ defineExpose({
                         :placeholder="field.placeholder"
                         v-model="state[key]"
                     />
-                    <span
-                        v-if="field.show_token && models.selectedModel && datasets.selectedDataset && models.selectedModel.user_fine_tune === true && datasets.selectedDataset.token">
-                    {{ $t('input.text.your dataset key is') }}: <b>{{ datasets.selectedDataset.token }}</b>
-                </span>
+                    <div
+                        v-if="showAdditionalData(field)"
+                    >
+                        <span v-for="(data, name) in models.selectedModel.data" class="block">
+                            {{ name }} : <b>{{ data }}</b>
+                        </span>
+                    </div>
                 </UFormGroup>
             </div>
         </div>

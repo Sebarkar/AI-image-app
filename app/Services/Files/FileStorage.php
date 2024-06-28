@@ -3,9 +3,14 @@
 namespace App\Services\Files;
 
 use App\Models\Files;
+use App\Services\Image\ImageProcessor;
+use App\Services\Image\ImageTransformer;
 use Illuminate\Http\File;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\EncodedImage;
+use Intervention\Image\Image;
 use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class FileStorage
@@ -84,36 +89,88 @@ class FileStorage
         return $url;
     }
 
-    public static function storeImages($files, $target, $targetType = 'tasks'): array
+    public static function storeFile(UploadedFile $file, $target, $targetType = 'tasks', $disk = 'images')
     {
-        $dbFiles = [];
-        foreach ($files as $file) {
-            if (is_string($file)) {
-                $file = Http::get($file)->body();
-            }
+        //Check file is exist in DB (Do not overload storage by duplicates)
+        if ($oldFile = FileStorage::getSameFileModelFromDb($targetType, $file)) {
+            return $oldFile;
+        };
 
-            $extension = $file->getExtension() ? $file->getExtension() : 'jpg';
+        $extension = $file->getExtension() ? $file->getExtension() : 'jpg';
 
-            $filename = hash('sha256', $target->id . rand(0, 102200));
+        $filename = hash('sha256', $target->id . rand(0, 102200));
 
-            $filename = $filename . '.' . $extension;
+        $filename = $filename . '.' . $extension;
 
-            $storagePath = '/' . $target->user_id . '/' . $target->id . $filename;
+        $fullPath = ($target->user_id ? '/' . $target->user_id . '/' : '') . $target->id . $filename;
 
-            Storage::disk('images')->put($storagePath, file_get_contents($file));
-
-            $dbFiles[] = Files::create(
+        if (Storage::disk($disk)->put($fullPath, file_get_contents($file))) {
+            return Files::create(
                 [
                     'target_id' => $target->id,
                     'target' => $targetType,
                     'filename' => $filename,
-                    'storage_path' => $storagePath,
-                    'storage' => 'images',
+                    'storage_path' => $fullPath,
+                    'hash' => hash_file('sha256', $file->getRealPath()),
+                    'storage' => $disk,
                     'extension' => $extension,
                 ]
             );
+        } else {
+            return null;
+        }
+    }
+
+    public static function storeImages($files, $target, $targetType = 'tasks'): array
+    {
+        $dbFiles = [];
+        foreach ($files as $file) {
+            $dbFiles[] = self::storeFile($file, $target, $targetType);
         }
 
         return $dbFiles;
+    }
+
+    public static function buildTempPath($extension)
+    {
+        $tmpDir = (new TemporaryDirectory())
+            ->deleteWhenDestroyed()
+            ->make();
+        return $tmpDir->path('file.' . $extension);
+    }
+
+    public static function getExtensionFromUrl($url)
+    {
+        $pathInfo = pathinfo(parse_url($url, PHP_URL_PATH));
+        return $pathInfo['extension'] ?? 'any'; // Default to empty if not found
+    }
+
+    public static function getTempFileFromContent($fileContent, $extension)
+    {
+        // Save the content to a temporary file
+        $tmpPath = self::buildTempPath($extension);
+        file_put_contents($tmpPath, $fileContent);
+
+        // Optionally, you can create an UploadedFile object if you need to simulate file upload
+        return new UploadedFile(
+            $tmpPath,
+            'file.' . $extension,
+            $extension, // Determine MIME type
+            null, // Error code
+            true // Test mode to skip some validation
+        );
+    }
+
+    public static function downloadFromLink($url)
+    {
+        $fileContent = Http::get($url)->body();
+        $extension = self::getExtensionFromUrl($url);
+
+        return self::getTempFileFromContent($fileContent, $extension);
+    }
+
+    public static function getSameFileModelFromDb($targetType, UploadedFile $file)
+    {
+        return Files::where('target', $targetType)->where('hash', hash_file('sha256', $file->getRealPath()))->first();
     }
 }

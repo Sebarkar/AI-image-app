@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Events\Task;
+namespace App\Events\Predict;
 
 use App\Http\Resources\TaskResource;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -8,7 +8,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TaskFinished implements ShouldBroadcastNow
+class PredictStarted implements ShouldBroadcastNow
 {
     use Dispatchable, SerializesModels;
 
@@ -43,7 +43,7 @@ class TaskFinished implements ShouldBroadcastNow
      */
     public function broadcastAs()
     {
-        return 'task.finished';
+        return 'predict.started';
     }
 
     /**
@@ -55,6 +55,7 @@ class TaskFinished implements ShouldBroadcastNow
     {
         return [
             'task' => new TaskResource($this->task),
+            'message' => __('messages.Predict started'),
         ];
     }
 }

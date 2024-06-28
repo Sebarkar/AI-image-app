@@ -8,9 +8,38 @@ const state = reactive({
     imagesDataset: new FormData(),
 })
 
+const props = defineProps<{
+    errors?: [undefined, Object]
+}>()
+
+const errorsState = ref(props.errors)
+
+watch(() => props.errors, () => {
+    prepareErrors()
+})
+
+function prepareErrors() {
+    if (props.errors) {
+        let errorsObject = {};
+        //Add names to errors
+        state.images.map((file: any) => file.name).forEach((name: any, index) => {
+            let i = props.errors.findIndex((error: any) => +error.path === index)
+            if (i  > -1) {
+                errorsObject[name] = props.errors[i]['message']
+            }
+        })
+        errorsState.value = errorsObject;
+    }
+}
+
+function dropErrorName(name: string) {
+    errorsState[name] = null
+}
+
 function resetImageUploader(index: any) {
     imageUploader.value.value = ''
     noImagesError.value = false;
+    errorsState.value = {};
 }
 
 function addImages(inputFiles: any) {
@@ -23,6 +52,7 @@ function addImages(inputFiles: any) {
             }
         })
     }
+    changeFilesInput();
 }
 
 const images = computed(() => {
@@ -40,8 +70,7 @@ const images = computed(() => {
 const emits = defineEmits(['input', 'files-dropped'])
 
 watch(() => images.value, (val) => {
-
-    emits('input', imageUploader.value.files)
+    emits('input', state.images)
 })
 
 function checkImages() {
@@ -52,9 +81,13 @@ function checkImages() {
     return true
 }
 
-function removeImage(index: any) {
+function removeImage(index: any, name: string) {
     state.images.splice(index, 1)
+    dropErrorName(name)
+    changeFilesInput();
+}
 
+function changeFilesInput() {
     let dt = new DataTransfer()
     let files = Array.from(imageUploader.value.files)
     files.forEach((file: any) => {
@@ -74,6 +107,7 @@ function setActive() {
     active.value = true
     clearTimeout(inActiveTimeout) // clear the timeout
 }
+
 function setInactive() {
     inActiveTimeout = setTimeout(() => {
         active.value = false
@@ -132,9 +166,16 @@ const validate = (state: any) => {
             :key="image.key"
             class="w-32 h-32 rounded-xl relative"
         >
-            <UButton size="xs" color="error" @click="removeImage(index)" :disabled="loading"
-                     class="absolute -top-1 -right-1 rounded-full" icon="remove"/>
-            <img :src="image.src" alt="image" class="w-full h-full block object-cover rounded-xl">
+            <UButton size="xs" color="error" @click="removeImage(index, image.key)" :disabled="loading"
+                     class="absolute -top-1 -right-1 rounded-full z-10" icon="remove"/>
+            <div class="w-full h-full relative z-0">
+                <img :src="image.src" alt="image" class="w-full h-full block object-cover rounded-xl">
+                <Transition name="fade" class="absolute inset-center" tag="div">
+                    <div v-if="errorsState && errorsState[image.key]" class=" rounded-xl text-2xs p-2 bg-error-300 text-center">
+                        {{ errorsState[image.key] }}
+                    </div>
+                </Transition>
+            </div>
         </div>
     </TransitionGroup>
 </template>

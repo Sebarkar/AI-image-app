@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Front;
 
-use App\Events\Datasets\DatasetFinished;
-use App\Events\Task\TaskFinished;
-use App\Events\Task\TaskStatusChanged;
+use App\Events\Predict\PredictFinished;
+use App\Events\Predict\PredictStatusChanged;
+use App\Events\Train\TrainStatusChanged;
 use App\Jobs\SaveImages;
-use App\Models\Datasets;
+use App\Jobs\TrainModelFinish;
 use App\Models\Task;
 use App\Services\AIs\Instances\Responses\PredictionResponseInstance;
 use App\Services\AIs\Instances\Responses\ResponseInstance;
@@ -17,6 +17,7 @@ class WebhookController
 {
     public function handle(Request $request, string $task_id)
     {
+
         $task = Task::where('id', $task_id)->first();
 
         $response = PredictionResponseInstance::make($task->provider)->handle((object)$request->collect()->toArray());
@@ -24,7 +25,7 @@ class WebhookController
         $task->update([
             'status' => $response->status,
             'finished_at' => $response->finished_at,
-            'result' => $response->output,
+            'result' => is_string($response->output) ? [$response->output] : $response->output,
             'last_response' => $response,
         ]);
 
@@ -35,23 +36,30 @@ class WebhookController
                     function () use ($task) {
                         $task->refresh();
                         $task->loadMissing('images');
-                        TaskFinished::dispatch($task);
+                        PredictFinished::dispatch($task);
                     },
                 ])->dispatch();
             } else {
-                TaskStatusChanged::dispatch($task);
+                PredictStatusChanged::dispatch($task);
             }
         }
 
         if ($task->type === 'train') {
-            $dataset = Datasets::where('id', $task->target_id)->first();
-            $dataset->update([
-                'status' => ResponseInstance::STATUS_COMPLETED,
-                'model' => $response->model,
-                'version' => $response->version,
-                'model_owner' => 'stability-ai/sdxl',
-            ]);
-            DatasetFinished::dispatch($dataset);
+            if ($response->completed()) {
+                $task->update([
+                    'status' => ResponseInstance::STATUS_COMPLETED,
+                    'model' => $response->model,
+                    'version' => $response->version,
+                    'model_owner' => 'stability-ai/sdxl',
+                    'model_name' => 'stability-ai/sdxl',
+                ]);
+
+                Bus::chain([
+                    new TrainModelFinish($task),
+                ])->dispatch();
+            } else {
+                TrainStatusChanged::dispatch($task);
+            }
         }
 
         return response()->json([

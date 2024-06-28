@@ -5,6 +5,7 @@ const models = useModelsStore()
 
 const formContainer = ref(null)
 const isOpen = ref(false)
+const form = ref(null)
 const loading = ref(false)
 
 watch(() => modals.isModalOpened('train-model'), (val) => {
@@ -18,16 +19,16 @@ const images = computed(() => {
     return [];
 })
 
-function submit() {
-    formContainer.value.submit()
-}
-
 const trainFields = computed(() => {
     if (models.selectedModel?.train) {
-        return models.selectedModel.train.form
+        return models.selectedModel.train
     }
     return []
 })
+
+const submit = () => {
+    form.value.submit()
+}
 
 </script>
 
@@ -49,6 +50,14 @@ const trainFields = computed(() => {
                 :model="models.selectedModel"
             />
             <FormsModelsModelForm
+                ref="form"
+                class="pb-10"
+                endpoint="train"
+                @loading="loading = $event"
+                :additional-data="{
+                    model_name: models.selectedModel?.name,
+                    model_owner: models.selectedModel?.owner,
+                }"
                 v-if="trainFields"
                 :fields="trainFields"
             />

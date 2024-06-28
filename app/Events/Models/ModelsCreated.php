@@ -54,7 +54,8 @@ class ModelsCreated implements ShouldBroadcastNow
     public function broadcastWith()
     {
         return [
-            'id' => $this->model->id,
+            'model_id' => $this->model->id,
+            'message' => __('messages.Model created'),
         ];
     }
 }

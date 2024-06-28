@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {googleOneTap} from "vue3-google-login"
-import {tasks} from "nitropack/runtime/virtual/tasks";
 
 const guest = useGuestStore();
 const auth = useAuthStore();

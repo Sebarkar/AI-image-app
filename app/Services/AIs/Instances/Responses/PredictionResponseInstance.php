@@ -12,6 +12,7 @@ class PredictionResponseInstance extends ResponseInstance
     public $output;
     public $error;
     public $status;
+    public $token;
     public $created_at;
     public $data_removed;
     public $started_at;
@@ -39,6 +40,6 @@ class PredictionResponseInstance extends ResponseInstance
 
     public function completed()
     {
-        return $this->status === ResponseInstance::STATUS_COMPLETED;
+        return $this->status === ResponseInstance::STATUS_COMPLETED || $this->status === ResponseInstance::STATUS_SUCCEEDED;
     }
 }
